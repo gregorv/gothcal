@@ -23,14 +23,14 @@ import hashlib
 from datetime import timedelta
 
 def generateVCalendar(event_list):
-    calendar =  u"BEGIN:VCALENDAR\r\n"
-    calendar += u"PRODID:-//K Desktop Environment//NONSGML KOrganizer 4.4.5//EN\r\n"
-    calendar += u"VERSION:2.0\r\n"
-    calendar += u"CALSCALE:GREGORIAN\r\n"
+    calendar =  "BEGIN:VCALENDAR\r\n"
+    calendar += "PRODID:-//K Desktop Environment//NONSGML KOrganizer 4.4.5//EN\r\n"
+    calendar += "VERSION:2.0\r\n"
+    calendar += "CALSCALE:GREGORIAN\r\n"
     
-    calendar += u"BEGIN:VTIMEZONE\r\n"
-    calendar += u"TZID:Europe/Berlin\r\n"
-    calendar += u"END:VTIMEZONE\r\n"
+    calendar += "BEGIN:VTIMEZONE\r\n"
+    calendar += "TZID:Europe/Berlin\r\n"
+    calendar += "END:VTIMEZONE\r\n"
     
     for date, url, name, description, club in event_list:
         id = 0
@@ -38,23 +38,23 @@ def generateVCalendar(event_list):
         dtstart = date.strftime('%Y%m%d')
         dtend = (date+timedelta(1)).strftime('%Y%m%d')
         
-        calendar += u"BEGIN:VEVENT\r\n"
-        calendar += u"UID:{0}{1}@gothcal.dynamic-noise.net\r\n".format(hashlib.md5(name.encode('utf-8')).hexdigest(), dtstart)
-        calendar += u"SUMMARY:"+name+u"\r\n"
+        calendar += "BEGIN:VEVENT\r\n"
+        calendar += "UID:{0}{1}@gothcal.dynamic-noise.net\r\n".format(hashlib.md5(name.encode('utf-8')).hexdigest(), dtstart)
+        calendar += "SUMMARY:"+name+"\r\n"
         
-        #calendar += u"DESCRIPTION:"
-        #calendar += unicode(description)+u"\\n\\n"
-        #calendar += u"\r\n"
+        #calendar += "DESCRIPTION:"
+        #calendar += unicode(description)+"\\n\\n"
+        #calendar += "\r\n"
         
-        calendar += u"DTSTART;VALUE=DATE:"+dtstart+u"\r\n"
-        calendar += u"DTEND;VALUE=DATE:"+dtend+u"\r\n"
-        calendar += u"URL:"+url+u"\r\n"
-        calendar += u"LOCATION:"+club+"\r\n"
-        calendar += u"STATUS:CONFIRMED\r\n"
-        calendar += u"TRANSP:OPAQUE\r\n"
+        calendar += "DTSTART;VALUE=DATE:"+dtstart+"\r\n"
+        calendar += "DTEND;VALUE=DATE:"+dtend+"\r\n"
+        calendar += "URL:"+url+"\r\n"
+        calendar += "LOCATION:"+club+"\r\n"
+        calendar += "STATUS:CONFIRMED\r\n"
+        calendar += "TRANSP:OPAQUE\r\n"
         
-        calendar += u"END:VEVENT\r\n"
-    calendar += u"END:VCALENDAR"
+        calendar += "END:VEVENT\r\n"
+    calendar += "END:VCALENDAR"
     
     return calendar
 
