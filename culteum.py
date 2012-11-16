@@ -58,7 +58,7 @@ def getEvents(config):
     conn.request("GET", "/events/events-default/")
     resp = conn.getresponse()
     parser = CulteumParser()
-    parser.feed(str(resp.read()))
+    parser.feed(resp.read().decode("utf-8", "ignore"))
     
     return parser.output
 

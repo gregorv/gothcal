@@ -53,7 +53,7 @@ def getEvents(config):
     conn.request("GET", "/")
     resp = conn.getresponse()
     parser = SchwimmbadParser()
-    parser.feed(str(resp.read()))
+    parser.feed(resp.read().decode("utf-8", "ignore"))
     conn.close()
     
     return parser.output
