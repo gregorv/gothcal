@@ -31,6 +31,8 @@ class NachtwerkParser(HTMLParser):
         self.get_data = False
         self.output = []
         self.current_dataset = []
+        self.cur_data_tag = ""
+        self.prev_data_tag = ""
     
     def handle_startendtag(self, tag, attr):
         if not self.in_program_block:
@@ -38,40 +40,60 @@ class NachtwerkParser(HTMLParser):
         if tag == "hr":
             self.addDatasetIfNeccessary()
             self.new_block = True
-            self.block_div_counter = 0
+            self.block_div_counter = 1
             self.current_dataset = []
         
     def handle_data(self, data):
         if self.get_data:
-            self.current_dataset.append(data)
+            print(self.cur_data_tag)
+            if self.cur_data_tag == self.prev_data_tag \
+                and self.cur_data_tag == "strong" \
+                and len(self.current_dataset) > 0:
+                try:
+                    datetime.strptime(self.current_dataset[-1].split(" ")[1], "%d.%m.%y")
+                    self.current_dataset.append(data)
+                except Exception as e:
+                    print(e,data)
+                    self.current_dataset[-1] += data
+            else:
+                self.current_dataset.append(data)
             self.get_data = False
+            print(repr(self.current_dataset[-1]))
+            self.prev_data_tag = self.cur_data_tag
     
     def handle_starttag(self, tag, attr):
-        if tag == "h1":
-            self.in_program_block = True
+        if not self.in_program_block and tag == "div":
+            attr = dict(attr)
+            if "class" in attr and attr["class"] == "article":
+                self.in_program_block = True
         elif self.in_program_block:
             attr = dict(attr)
             if tag == "div":
                 self.div_depth += 1
-            elif tag == "strong":
+            elif tag == "strong" and not self.get_data:
                 self.get_data = True
+                self.cur_data_tag = tag
             elif tag == "a":
                 self.get_data = True
+                self.cur_data_tag = tag
                 url = attr["href"]
                 if url[0] == "/":
                     url = "http://nachtwerk-musikclub.de"+url
                 self.current_dataset.append(url)
+                
     
     def handle_endtag(self, tag):
         if not self.in_program_block:
             return
         if tag == "div":
             self.div_depth -= 1
-            if self.div_depth <= 0:
+            print(self.div_depth)
+            if self.div_depth < 0:
                 self.in_program_block = False
                 self.addDatasetIfNeccessary()
         
     def addDatasetIfNeccessary(self):
+        print("addDatasetIfNeccessary", not not self.current_dataset)
         if not self.current_dataset:
             return
         
@@ -84,22 +106,16 @@ class NachtwerkParser(HTMLParser):
         except ValueError:
             return
         lower_name = name.lower()
-        if "partykingz" in lower_name:
-            return
-        elif "colo" in lower_name:
-            return
-        elif "rosapark" in lower_name:
-            return
-        elif "herz tanzt farben" in lower_name:
-            return
-        elif "da vibez" in lower_name:
-            return
-        elif "crazy friday" in lower_name:
-            return
-        elif "8090-party" in lower_name:
-            return
+        blacklist = ["partykingz", "colo", "rosapark", "herz tanzt farben",
+            "da vibez", "crazy friday", "8090-party", "geschlossen"]
+        for party in blacklist:
+            if party in lower_name:
+                return
         
-        date = datetime.strptime(date.split(" ")[1], "%d.%m.%y")
+        try:
+            date = datetime.strptime(date.split(" ")[1], "%d.%m.%y")
+        except ValueError:
+            date = datetime.strptime(date.split(" ")[1], "%d.%m.%Y")
         
         self.output.append((date, link, name, "", "Nachtwerk Karlsruhe"))
         
